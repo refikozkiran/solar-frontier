@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Solar Frontier: The Eight Stones</title>
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div id="game-container"></div>
+  <div id="error-overlay"></div>
+  <script>
+    // Visible-on-screen error reporting. Without this, a failed module load
+    // or runtime exception just leaves a black screen with no way to
+    // diagnose it on a phone without a desktop dev console attached.
+    (function () {
+      var overlay = document.getElementById('error-overlay');
+      function show(msg) {
+        overlay.style.display = 'block';
+        var line = document.createElement('div');
+        line.textContent = msg;
+        overlay.appendChild(line);
+      }
+      window.addEventListener('error', function (e) {
+        show((e.error && e.error.stack) || e.message || String(e));
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        show('Unhandled promise rejection: ' + ((e.reason && e.reason.stack) || e.reason));
+      });
+    })();
+  </script>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

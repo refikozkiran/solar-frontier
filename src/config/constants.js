@@ -11,7 +11,7 @@ export const SCENE_KEYS = {
   GAME: 'GameScene',
   GAME_OVER: 'GameOverScene',
   LEVEL_COMPLETE: 'LevelCompleteScene',
-  PLACEHOLDER_MAP: 'PlaceholderMapScene'
+  MERCURY_MAP: 'MercuryLevelMapScene'
 };
 
 // Vertical regions of the 720x1280 logical canvas. Kept in one place so the
@@ -31,10 +31,14 @@ export const DEPTH = {
   STARS: 1,
   POWERUPS: 4,
   ENEMIES: 5,
+  BOSS: 5,
   PROJECTILES: 6,
   PLAYER: 7,
   EFFECTS: 8,
-  HUD: 20
+  HUD: 20,
+  MAP_PATH: 1,
+  MAP_NODES: 5,
+  MAP_HUD: 20
 };
 
 // Event names used on the global EventBus (see utils/EventBus.js). Using
@@ -59,7 +63,13 @@ export const EVENTS = {
   PLAYER_LEVEL_UP: 'player-level-up',
 
   POWERUP_COLLECTED: 'powerup-collected',
-  POWERUP_EXPIRED: 'powerup-expired'
+  POWERUP_EXPIRED: 'powerup-expired',
+
+  BOSS_WAVE_STARTED: 'boss-wave-started',
+  BOSS_SPAWNED: 'boss-spawned',
+  BOSS_HP_CHANGED: 'boss-hp-changed',
+  BOSS_PHASE_CHANGED: 'boss-phase-changed',
+  BOSS_DEFEATED: 'boss-defeated'
 };
 
 export const TEXTURE_KEYS = {
@@ -72,4 +82,7 @@ export const TEXTURE_KEYS = {
   PARTICLE_SPARK: 'tex-particle-spark'
 };
 
-export const STORAGE_KEY = 'solar-frontier-save-v1';
+// Bumped to v2 for the Phase 2 save shape (per-planet completedLevels map +
+// stones). SaveManager.loadGame() merges defensively either way, but a new
+// key avoids ever trying to interpret a v1 payload as v2 progression data.
+export const STORAGE_KEY = 'solar-frontier-save-v2';

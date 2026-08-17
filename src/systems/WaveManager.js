@@ -24,6 +24,11 @@ export class WaveManager {
     this._spawnIntervalMs = 600;
     this._aliveCount = 0;
     this._isWaveActive = false;
+
+    // Boss waves (spec section 8/9: "the boss IS wave 5") are driven
+    // externally by GameScene/BossManager rather than the normal
+    // spawn-queue/alive-count loop below — see startNextWave()/update().
+    this._isBossWave = false;
   }
 
   /** @param {object} levelData shape from data/levels.js */
@@ -40,13 +45,29 @@ export class WaveManager {
     }
 
     const wave = this.levelData.waves[this.currentWaveIndex];
-    this._spawnIntervalMs = wave.spawnIntervalMs ?? 600;
     this._spawnTimerMs = 0;
     this._aliveCount = 0;
     this._isWaveActive = true;
+    this._spawnQueue = [];
+
+    if (wave.isBossWave) {
+      // No enemy spawn queue here — BossManager owns the boss's lifecycle.
+      // GameScene calls notifyBossDefeated() when the boss dies, which is
+      // what actually advances/completes the level (see below).
+      this._isBossWave = true;
+      EventBus.emit(EVENTS.WAVE_STARTED, {
+        waveNumber: this.currentWaveIndex + 1,
+        totalWaves: this.totalWaves,
+        isBossWave: true,
+        bossId: wave.bossId
+      });
+      return true;
+    }
+
+    this._isBossWave = false;
+    this._spawnIntervalMs = wave.spawnIntervalMs ?? 600;
 
     // Flatten { type, count } groups into a flat spawn queue.
-    this._spawnQueue = [];
     for (const group of wave.enemies) {
       for (let i = 0; i < group.count; i++) {
         this._spawnQueue.push(group.type);
@@ -55,7 +76,8 @@ export class WaveManager {
 
     EventBus.emit(EVENTS.WAVE_STARTED, {
       waveNumber: this.currentWaveIndex + 1,
-      totalWaves: this.totalWaves
+      totalWaves: this.totalWaves,
+      isBossWave: false
     });
 
     return true;
@@ -63,7 +85,7 @@ export class WaveManager {
 
   /** @param {number} deltaMs */
   update(deltaMs) {
-    if (!this._isWaveActive) return;
+    if (!this._isWaveActive || this._isBossWave) return;
 
     if (this._spawnQueue.length > 0) {
       this._spawnTimerMs -= deltaMs;
@@ -96,6 +118,19 @@ export class WaveManager {
   /** Called by GameScene whenever a spawned enemy dies OR despawns unfought. */
   notifyEnemyResolved() {
     this._aliveCount = Math.max(0, this._aliveCount - 1);
+  }
+
+  /**
+   * Called by GameScene once BossManager reports the boss dead. Reuses the
+   * normal WAVE_COMPLETED path so LevelManager.advanceWave()'s
+   * isLevelComplete() check (and therefore completeLevel()) works exactly
+   * like it does after a regular wave.
+   */
+  notifyBossDefeated() {
+    if (!this._isBossWave) return;
+    this._isBossWave = false;
+    this._isWaveActive = false;
+    EventBus.emit(EVENTS.WAVE_COMPLETED, { waveNumber: this.currentWaveIndex + 1 });
   }
 
   isLevelComplete() {

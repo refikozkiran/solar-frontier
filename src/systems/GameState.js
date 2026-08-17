@@ -1,4 +1,5 @@
 import { getShipConfig, DEFAULT_SHIP_ID } from '../data/player.js';
+import { createDefaultStoneState } from '../data/stones.js';
 
 /**
  * Single centralized game state. Every system (CurrencyManager, XPManager,
@@ -23,11 +24,16 @@ function createDefaultState() {
     progression: {
       currentPlanet: 'mercury',
       currentLevel: 1,
-      completedLevels: [] // e.g. ['mercury-1']
+      // Per-planet arrays of completed level numbers, e.g. { mercury: [1,2,3] }.
+      // Unlocked level is always derived from this — never stored directly.
+      completedLevels: { mercury: [] }
     },
     inventory: {
-      stones: [] // collected cosmic stone ids
-    }
+      stones: [] // collected cosmic stone ids, kept for anything reading a flat list
+    },
+    // Per-planet boolean, e.g. { mercury: false, venus: false, ... } —
+    // mirrors data/stones.js so a fresh save always has all 8 keys.
+    stones: createDefaultStoneState()
   };
 }
 

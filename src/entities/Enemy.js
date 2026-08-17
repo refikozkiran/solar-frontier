@@ -40,8 +40,17 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.coinReward = config.coinReward;
     this.xpReward = config.xpReward;
     this.enemyType = config.id;
-    this.clearTint();
     this.setAlpha(1);
+    this.setScale(config.scale ?? 1);
+
+    // Remembered so the post-hit white flash (below) restores the right
+    // color instead of clearing back to the texture's default red.
+    this._baseTint = config.color ?? null;
+    if (this._baseTint) {
+      this.setTint(this._baseTint);
+    } else {
+      this.clearTint();
+    }
 
     if (this.body) {
       this.body.enable = true;
@@ -83,7 +92,12 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   _playHitFlash() {
     this.setTintFill(0xffffff);
     this.scene.time.delayedCall(60, () => {
-      if (this.active) this.clearTint();
+      if (!this.active) return;
+      if (this._baseTint) {
+        this.setTint(this._baseTint);
+      } else {
+        this.clearTint();
+      }
     });
   }
 }

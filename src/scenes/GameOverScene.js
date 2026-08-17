@@ -20,7 +20,7 @@ export class GameOverScene extends Phaser.Scene {
       coinsEarned: this.coinsEarned,
       xpEarned: this.xpEarned,
       onRetry: () => this.scene.start(SCENE_KEYS.GAME),
-      onLevelMap: () => this.scene.start(SCENE_KEYS.PLACEHOLDER_MAP)
+      onLevelMap: () => this.scene.start(SCENE_KEYS.MERCURY_MAP)
     });
   }
 }

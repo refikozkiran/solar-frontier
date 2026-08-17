@@ -24,7 +24,10 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create() {
-    this.scene.start(SCENE_KEYS.GAME);
+    // Phase 2: Preload -> Level Map (not straight into gameplay), per spec
+    // section 1's Main Menu -> Map -> Select Level -> Gameplay flow. There
+    // is no Main Menu scene yet, so the map is the current entry point.
+    this.scene.start(SCENE_KEYS.MERCURY_MAP);
   }
 
   _generatePlayerShip() {
